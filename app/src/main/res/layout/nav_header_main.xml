@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200sp"
+    android:orientation="vertical"
+    android:background="@color/colorDuckGreen"
+    android:gravity="bottom"
+    android:padding="16sp"
+    >
+    <ImageView
+        android:layout_width="50sp"
+        android:layout_height="50sp"
+        android:src="@drawable/ic_baseline_memory_24"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="我的笔记本"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:paddingTop="10sp"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1.0.0v"
+        android:textColor="@color/white"
+        android:textSize="16sp"/>
+
+</LinearLayout>
