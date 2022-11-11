@@ -20,9 +20,10 @@ public class Note {
                 '}';
     }
 
-    public Note(String content, String time) {
+    public Note(String content, String time,int tag) {
         this.content = content;
         this.time = time;
+        this.tag = tag;
     }
     public long getId() {
         return id;

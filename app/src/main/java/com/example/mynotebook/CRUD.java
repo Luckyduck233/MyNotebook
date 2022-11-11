@@ -42,35 +42,42 @@ public class CRUD {
         contentValues.put(NoteDatabase.CONTENT, note.getContent());
         contentValues.put(NoteDatabase.TIME, note.getTime());
         contentValues.put(NoteDatabase.MODE,note.getTag());
-        long insertId = db.insert(NoteDatabase.TABLE_NAME, null, contentValues);
+
+        long insertId = db.insert(NoteDatabase.TABLE_NAME, "null", contentValues);
+
         note.setId(insertId);
-        Log.d(TAG1, "CRUD 2");
+        Log.d(TAG1, "2 note toString的值为"+note.toString());
         return note;
     }
+
+
 
     //    从database中获取单个笔记
-    public Note getNote(long id) {
-        Cursor cursor = db.query(NoteDatabase.TABLE_NAME, columns, NoteDatabase.ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-        Note note = new Note(cursor.getString(1), cursor.getString(2));
-        return note;
-    }
+//    public Note getNote(long id) {
+//        Cursor cursor = db.query(NoteDatabase.TABLE_NAME, columns, NoteDatabase.ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+//        if (cursor != null) {
+//            cursor.moveToFirst();
+//        }
+//        Note note = new Note(cursor.getString(1), cursor.getString(2));
+//        return note;
+//    }
 
     //    从database中获取所右笔记的列表
-    public List getAllNotes() {
+    public List<Note> getAllNotes() {
         Log.d(TAG1, "getAllnotes");
-        Cursor cursor = db.query(NoteDatabase.TABLE_NAME, columns, null, null, null, null, null);
 
-        List notes = new ArrayList<>();
+//        Cursor cursor = db.query(NoteDatabase.TABLE_NAME, columns, null, null, null, null, null);
+        String s = db.toString();
+        Cursor cursor = db.query(NoteDatabase.TABLE_NAME,columns,null,null,null, null, null);
+        Log.d(TAG1, "cursor的值为："+cursor.getCount());
+        Log.d(TAG1, "db的值为："+s);
+        List<Note> notes = new ArrayList<>();
 
-        Log.d(TAG1, cursor.getCount()+"cursor");
+        Log.d(TAG1, "cursor的值是："+cursor.getCount());
         if (cursor.getCount() > 0) {
-            Log.d(TAG1, "getAllnotes if");
-            Log.d(TAG1, cursor.getCount()+"");
+
             while (cursor.moveToNext()) {
-                Log.d(TAG1, "getAllnotes while");
+
                 Note note = new Note();
                 int index = cursor.getColumnIndex(NoteDatabase.ID);
                 note.setId(cursor.getLong(index));
@@ -86,5 +93,10 @@ public class CRUD {
         }
         Log.d(TAG1, notes.size()+"");
         return notes;
+    }
+
+//    根据id删除目标日记
+    public void removeNote(Note deletedNote) {
+        db.delete(NoteDatabase.TABLE_NAME, NoteDatabase.ID + "=" + deletedNote.getId(), null);
     }
 }

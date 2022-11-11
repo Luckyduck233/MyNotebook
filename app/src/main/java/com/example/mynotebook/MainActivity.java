@@ -1,21 +1,24 @@
 package com.example.mynotebook;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tv_main;
     private ListView lv;
     private NoteAdapter adapter;
-    private List noteList = new ArrayList();
+    private List<Note> noteList = new ArrayList();
     private Achievement achievement;
     private Context context = this;
 
@@ -61,24 +64,6 @@ public class MainActivity extends AppCompatActivity {
 //        设置导航图标要在setSupportActionBar方法之后
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_baseline_menu_24);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_search:
-                        Toast.makeText(MainActivity.this, "搜索", Toast.LENGTH_SHORT).show();
-                        break;
-                    case R.id.action_refresh:
-                        Toast.makeText(MainActivity.this, "刷新", Toast.LENGTH_SHORT).show();
-                        break;
-                    case R.id.action_delete:
-                        Toast.makeText(MainActivity.this, "删除", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-                return false;
-            }
-        });
-
 
     }
 
@@ -99,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
             noteList.clear();
             Log.d(TAG1, "noteList clear2");
             noteList.addAll(crud.getAllNotes());
-            Log.d(TAG1, noteList.size()+"");
+            Log.d(TAG1, noteList.size() + "");
         }
         crud.close();
         adapter.notifyDataSetChanged();
@@ -115,6 +100,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        //lv长按点击事件
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Note deletedNote = noteList.get(position);
+                new AlertDialog.Builder(context).setMessage("确认删除该笔记吗?").setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        CRUD crud = new CRUD(context);
+                        crud.open();
+                        crud.removeNote(deletedNote);
+                        crud.close();
+                        refreshListView();
+                    }
+                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
+                return true;
+            }
+        });
 //        点击打开和关闭侧边栏
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,31 +139,73 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+//        toolbar右侧按钮点击事件
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_search:
+                        Toast.makeText(MainActivity.this, "搜索", Toast.LENGTH_SHORT).show();
+                        String content = noteList.get(0).getContent();
+                        Log.d(TAG1, "notelist.getContent"+content);
+                        break;
+                    case R.id.action_refresh:
+                        Toast.makeText(MainActivity.this, "刷新", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.action_delete:
+                        Toast.makeText(MainActivity.this, "删除", Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(context).setMessage("是否删除所有日记?").setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                NoteDatabase deHelper = new NoteDatabase(context);
+                                SQLiteDatabase db = deHelper.getWritableDatabase();
+//                                根据表名删除表数据
+//                                删除 notes 表的所有数据
+                                db.delete("notes", null, null);
+//                                重置id 为 1
+                                db.execSQL("update sqlite_sequence set seq=0 where name='note'");
+                                refreshListView();
+                            }
+                        }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).create().show();
+
+                        break;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         int returnMode;
         returnMode = data.getExtras().getInt("mode");
-        Log.d(TAG1, returnMode+"");
 //        新建笔记
         if (returnMode == 0) {
             String content = data.getExtras().getString("content");
-            long testid = data.getExtras().getLong("testid");
-            String time = data.getExtras().getString("time");
-
-            Log.d(TAG1, "2");
-            Note note = new Note(content, time);
+            long testid = data.getLongExtra("testId",000);
+            String time = data.getStringExtra("time");
+            int tag = data.getIntExtra("tag",9999);
+//            Log.d("999", testid+"");
+//            Log.d("999", content);
+//            Log.d("999", time+"");
+//            Log.d("999", tag+"");
+            Note note = new Note(content, time, tag);
+//            String testC = note.toString();
+//            Log.d(TAG1, "note toString的值为" + testC);
             CRUD crud = new CRUD(context);
             crud.open();
             crud.addNote(note);
             crud.close();
         }
 
-        Log.d(TAG1, "start refreshLV");
         refreshListView();
-
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     //    加载菜单
@@ -164,6 +215,37 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+//    列表长按点击事件
+
+
+//    @Override
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//        Log.d(TAG1, "onItemLongClick: 执行了");
+//        Log.d(TAG1, parent.getId()+"");
+//        switch (parent.getId()) {
+//            case R.id.lv:
+//                Log.d(TAG1, "onItemLongClick: 执行了");
+//                final Note deletedNote = noteList.get(position);
+//                new AlertDialog.Builder(context).setMessage("确认删除该日记吗?").setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        CRUD op = new CRUD(context);
+//                        op.open();
+//                        op.removeNote(deletedNote);
+//                        op.close();
+//                        refreshListView();
+//                    }
+//                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.dismiss();
+//                    }
+//                }).create().show();
+//                break;
+//        }
+//
+//
+//    }
 
     //    功能实现系统
     public class Achievement {

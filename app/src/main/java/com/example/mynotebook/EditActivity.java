@@ -5,17 +5,24 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EditActivity extends AppCompatActivity {
 
     private static final String TAG = "EditActivity";
     private EditText mEditTxt;
     private Toolbar toolbar;
+    private int tag = 1;
+    private Spinner mSpinner;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,6 +37,18 @@ public class EditActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar_edit);
 
         toolbar.setNavigationIcon(R.drawable.ic_prev_24);
+
+        mSpinner = findViewById(R.id.spinner);
+
+        List<String> tagList = new ArrayList<String>();
+        tagList.add("无标签");
+        tagList.add("生活");
+        tagList.add("学习");
+        tagList.add("工作");
+        tagList.add("娱乐");
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,R.layout.spinner_item,tagList);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinner.setAdapter(spinnerAdapter);
     }
 
     private void initListener() {
@@ -44,6 +63,9 @@ public class EditActivity extends AppCompatActivity {
                 } else {
                     intent.putExtra("mode",Constants.Content_NEW );
                     intent.putExtra("content", mEditTxt.getText().toString());
+                    intent.putExtra("testid", Constants.TEST_ID);
+                    intent.putExtra("tag", 1);
+                    intent.putExtra("time", "2022-11-02");
                 }
                 setResult(RESULT_OK, intent);
                 finish();
@@ -63,6 +85,7 @@ public class EditActivity extends AppCompatActivity {
                 intent.putExtra("mode",Constants.Content_NEW );
                 intent.putExtra("content", mEditTxt.getText().toString());
                 intent.putExtra("testid", Constants.TEST_ID);
+                intent.putExtra("tag", 1);
                 intent.putExtra("time", "2022-11-02");
             }
             setResult(RESULT_OK, intent);

@@ -14,9 +14,9 @@ public class NoteDatabase extends SQLiteOpenHelper {
     public static final String MODE = "mode";
 
 
-    public NoteDatabase(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
-    }
+//    public NoteDatabase(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
+//        super(context, name, factory, version);
+//    }
 
     public NoteDatabase(Context context) {
         super(context, "notes", null, 1);
